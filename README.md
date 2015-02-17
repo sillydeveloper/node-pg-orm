@@ -75,7 +75,7 @@ Create an object with the properties in the hash. This will return a new pg-orm 
 ##### update()
 Update the database with the properties of the object that matches tableProperties. This will return the raw pg result.
 
-##### findById({ hash })
+##### findById(id)
 Find an object by ID. This will return a new pg-orm object.
 
 ##### deleteById(id)

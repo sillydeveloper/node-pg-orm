@@ -139,6 +139,10 @@ Base.prototype.deleteById = function(id) {
   return defer.promise;
 }; // end deleteById
 
+Base.prototype.delete = function() {
+  return this.deleteById(this.id);
+}; // end delete
+
 // ---------------------------------------
 
 module.exports.build = function(obj) {

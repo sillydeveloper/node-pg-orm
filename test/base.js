@@ -50,10 +50,18 @@ describe('crud operators', function () {
     });
   });
 
-  it('should be able to delete an existing object', function(done) {
+  it('should be able to delete an existing object by ID', function(done) {
     testBase.create({ 'name': 'Delete' }).then(function(testObject) {
       var _id = testObject.id;
       testObject.deleteById(_id).then(function(data) {
+        done();
+      })
+    });
+  });
+
+  it('should be able to delete an existing object', function(done) {
+    testBase.create({ 'name': 'Delete' }).then(function(testObject) {
+      testObject.delete().then(function(data) {
         done();
       })
     });

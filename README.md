@@ -1,6 +1,6 @@
 # An overly simplistic ORM experiment.
 
-This was built primarily to see how far I could get in an afternoon / evening in scratch building an ORM. You can see that in the initial [commits](https://github.com/sillydeveloper/node-pg-orm/commit/cdae9fe33e0c2e2ce79a9f8141f4773574706ccc). (Not to say I won't keep working on it!)
+This is a simple Postgres ORM that uses promises.
 
 ### Installation
 
@@ -24,7 +24,6 @@ Note that this will automatically use your database.json file to build the pg li
 ```
 
 ### Creating your models
-
 The ORM essentially acts like a factory that pops out objects based on a simple DSL. Here's an example definition:
 
 ```
@@ -68,8 +67,25 @@ person.create({ 'name': 'Jimmy Johnson', 'email': 'test@example.com' }).then(fun
 
 I like [db-migrate](https://www.npmjs.com/package/db-migrate) to manage the database changes and keep the domain in sync.
 
-### Quick start for development
+### Available methods
 
+##### create({ hash })
+Create an object with the properties in the hash. This will return a new pg-orm object.
+
+##### update()
+Update the database with the properties of the object that matches tableProperties. This will return the raw pg result.
+
+##### findById({ hash })
+Find an object by ID. This will return a new pg-orm object.
+
+##### deleteById(id)
+Delete the object by ID. This will return the raw pg result.
+
+##### delete()
+Euphamisn for deleteById with the current ID.
+
+
+### Quick start for developing pg-orm
 Clone the project locally then install node modules:
 
 ```

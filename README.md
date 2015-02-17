@@ -8,6 +8,21 @@ This was built primarily to see how far I could get in an afternoon / evening in
 npm install pg-orm --save
 ```
 
+Note that this will automatically use your database.json file to build the pg link, a la:
+
+```
+{
+  "dev": {
+    "driver": "pg",
+    "user": "skoobi",
+    "password": "something",
+    "host": "localhost",
+    "database": "myDB",
+    "schema": "myDBSchema"
+  }
+}
+```
+
 ### Creating your models
 
 The ORM essentially acts like a factory that pops out objects based on a simple DSL. Here's an example definition:

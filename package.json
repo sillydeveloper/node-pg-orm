@@ -1,6 +1,6 @@
 {
   "name": "pg-orm",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A simple node ORM for postgres",
   "homepage": "http://skoobistudios.com",
   "author": {

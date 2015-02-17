@@ -33,6 +33,7 @@ function dbCall(stmnt, values) {
 
 // ---------------------------------------
 
+// This should probably be in another file...
 var Base = function() {
   this.tableName = null;
   this.tableProperties = null;
@@ -46,6 +47,7 @@ Base.prototype.create = function(data) {
     _propertyValues = [], 
     _cnt = 1;
 
+  // check the incoming data to ensure that it's legit mapped to the db:
   for (var i in data) {
     if (this.tableProperties.hasOwnProperty(i)) {
       _propertyNames.push(i);
@@ -97,9 +99,45 @@ Base.prototype.update = function() {
   dbCall(stmnt, _propertyValues).then(function(data) {
     defer.resolve(data);
   });
-  
+
   return defer.promise;
 }; // end update
+
+Base.prototype.findById = function(id) {
+  var _this = this;
+  var stmnt = 'SELECT * FROM ' + _this.tableName + ' WHERE id = $1';
+
+  var defer = Q.defer();
+  dbCall(stmnt, [ id ]).then(function(data) {
+    if (data.rows.length < 1) {
+      defer.resolve(data);
+    }
+
+    // build a new object from the result:
+    var newObject = new Base();
+    newObject.tableProperties = _this.tableProperties;
+    newObject.tableName = _this.tableName;
+
+    for(var j in newObject.tableProperties) {
+      newObject[j] = data.rows[0][j];
+    }
+    defer.resolve(newObject);
+  });
+
+  return defer.promise;
+}; // end findById
+
+Base.prototype.deleteById = function(id) {
+  var _this = this;
+  var stmnt = 'DELETE FROM ' + _this.tableName + ' WHERE id=$1';
+
+  var defer = Q.defer();
+  dbCall(stmnt, [ id ]).then(function(data) {
+    defer.resolve(data);
+  });
+
+  return defer.promise;
+}; // end deleteById
 
 // ---------------------------------------
 

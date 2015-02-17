@@ -1,2 +1,7 @@
 # node-pg-orm
-A simple NodeJS ORM for Postgres
+
+
+npm install
+
+Create a database.json file in the root directory:
+

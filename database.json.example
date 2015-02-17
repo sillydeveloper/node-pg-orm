@@ -1,0 +1,10 @@
+{
+  "dev": {
+    "driver": "pg",
+    "user": "skoobi",
+    "password": "something",
+    "host": "localhost",
+    "database": "myDB",
+    "schema": "myDBSchema"
+  }
+}

@@ -77,13 +77,14 @@ Base.prototype.create = function(data) {
   return defer.promise;
 }; // end create
 
-Base.prototype.update = function() {
+Base.prototype.update = function(hash) {
   var _this = this;
 
   var _propertyValues = [], 
       _cnt = 1,
       _stmntChunks = [];
 
+  // statement building:
   for (var i in _this.tableProperties) {
     if (i != 'id') {
       _stmntChunks.push(i + ' = $' + _cnt);
@@ -145,15 +146,4 @@ Base.prototype.delete = function() {
 
 // ---------------------------------------
 
-module.exports.build = function(obj) {
-  if (typeof obj != 'object') throw new Error('Cannot build without an object');
-  if (obj.hasOwnProperty('tableName') == false && obj.tableName != null) throw new Error('Cannot build without a tableName to connect');
-  if (obj.hasOwnProperty('tableProperties') == false && obj.tableProperties != null) throw new Error('Cannot build without tableProperties to export');
-
-  var _return = new Base();
-  _return.tableName = obj.tableName;
-  _return.tableProperties = obj.tableProperties;
-
-  return _return;
-};
-
+module.exports.Base = Base;

@@ -2,10 +2,10 @@
 'use strict';
 
 var assert = require('assert');
-var base = require('../libs/base.js');
+var orm = require('../libs/orm.js');
 
 // tie the base tests to the test table:
-var testBase = base.build({ 
+var testBase = orm.build({ 
   'tableName': 'test', 
   'tableProperties': { 
     'id': {

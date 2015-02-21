@@ -1,4 +1,4 @@
-# An overly simplistic ORM experiment.
+# An overly simplistic ORM.
 
 This is a simple Postgres ORM that uses promises.
 

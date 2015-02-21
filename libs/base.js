@@ -5,6 +5,11 @@ var fs = require('fs');
 var Q = require('q');
 
 // read in the database.json file:
+var dbFile = './database.json';
+if (fs.existsSync(dbFile) == false) {
+  throw new Error('No database.json to read.');
+}
+
 var db = JSON.parse(fs.readFileSync('./database.json', 'utf8'));
 var connectionString = 'postgres://' + db.dev.user + ':' + db.dev.password + '@' + db.dev.host + '/' + db.dev.database;
 
@@ -14,12 +19,12 @@ function dbCall(stmnt, values) {
   var defer = Q.defer();
   pg.connect(connectionString, function(err, client, done) {
     if(err) {
-      return console.error('error fetching client from pool', err);
+      return console.error('Error fetching client from pool', err);
     }
 
     client.query(stmnt, values, function(err, result) {
       if(err) {
-        return console.error('error running query', err);
+        return console.error('Error running query', err);
       }
 
       // release!
@@ -82,17 +87,30 @@ Base.prototype.update = function(hash) {
 
   var _propertyValues = [], 
       _cnt = 1,
-      _stmntChunks = [];
+      _stmntChunks = [],
+      _sourceValues, 
+      _sourceKeys;
+
+  if (hash) {
+    _sourceValues = _sourceKeys = hash;
+  } else {
+    _sourceKeys = _this.tableProperties;
+    _sourceValues = _this;
+  } 
+
+  if (_sourceKeys.hasOwnProperty('id') == false || _sourceKeys.id == null) {
+    throw new Error('Update call with hash requires \'id\' to update');
+  }
 
   // statement building:
-  for (var i in _this.tableProperties) {
+  for (var i in _sourceKeys) {
     if (i != 'id') {
       _stmntChunks.push(i + ' = $' + _cnt);
       _cnt++;
-      _propertyValues.push(_this[i]);
+      _propertyValues.push(_sourceValues[i]);
     }
   }
-  _propertyValues.push(_this.id);
+  _propertyValues.push(_sourceValues.id);
 
   var stmnt = 'UPDATE ' + _this.tableName + ' SET ' + _stmntChunks.join() + ' WHERE id=$' + _cnt;
 

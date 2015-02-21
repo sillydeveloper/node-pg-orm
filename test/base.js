@@ -41,6 +41,18 @@ describe('crud operators', function () {
     });
   });
 
+  it('should be able to update an existing object with hash', function(done) {
+    this.timeout(5000);
+    testBase.create({ 'name': 'UpdateHash' }).then(function(testObject) {
+      testBase.update({ id: testObject.id, name: 'Richard'}).then(function(result) {
+        testBase.findById(testObject.id).then(function(newTestObject) {
+          assert(newTestObject.name === 'Richard', 'Should update to new name of Richard');
+          done();
+        })
+      });
+    });
+  });
+
   it('should be able to find an existing object', function(done) {
     testBase.create({ 'name': 'Find' }).then(function(testObject) {
       testBase.findById(testObject.id).then(function(newTestObject) {

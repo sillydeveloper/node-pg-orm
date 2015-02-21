@@ -1,6 +1,6 @@
 # An overly simplistic ORM.
 
-This is a simple Postgres ORM that uses promises.
+This is a simple Postgres ORM that uses promises. 
 
 ### Installation
 
@@ -74,6 +74,9 @@ Create an object with the properties in the hash. This will return a new pg-orm 
 
 ##### update()
 Update the database with the properties of the object that matches tableProperties. This will return the raw pg result.
+
+##### update(hash)
+Update the database with the properties of the hash. This will return the raw pg result.
 
 ##### findById(id)
 Find an object by ID. This will return a new pg-orm object.

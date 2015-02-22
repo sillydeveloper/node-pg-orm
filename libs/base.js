@@ -3,6 +3,7 @@
 var pg = require('pg');
 var fs = require('fs');
 var Q = require('q');
+var _ = require('lodash');
 
 // read in the database.json file:
 var dbFile = './database.json';
@@ -10,7 +11,7 @@ if (fs.existsSync(dbFile) == false) {
   throw new Error('No database.json to read.');
 }
 
-var db = JSON.parse(fs.readFileSync('./database.json', 'utf8'));
+var db = JSON.parse(fs.readFileSync(dbFile, 'utf8'));
 var connectionString = 'postgres://' + db.dev.user + ':' + db.dev.password + '@' + db.dev.host + '/' + db.dev.database;
 
 // convenience method:
@@ -24,13 +25,12 @@ function dbCall(stmnt, values) {
 
     client.query(stmnt, values, function(err, result) {
       if(err) {
-        return console.error('Error running query', err);
+        return console.error('Error running query:\n', err + '\n', stmnt, values + '\n');
       }
 
       // release!
       client.end();
       defer.resolve(result);
-      
     });
   });
   return defer.promise;
@@ -38,43 +38,41 @@ function dbCall(stmnt, values) {
 
 // ---------------------------------------
 
-// This should probably be in another file...
 var Base = function() {
   this.tableName = null;
   this.tableProperties = null;
 };
 
-Base.prototype.create = function(data) {
-  var _this = this;
-
-  var _ppo = [], 
-    _propertyNames = [], 
-    _propertyValues = [], 
-    _cnt = 1;
+Base.prototype.create = function(hash) {
+  var _this = this,
+      ppo = [], 
+      propertyNames = [], 
+      propertyValues = [], 
+      cnt = 1;
 
   // check the incoming data to ensure that it's legit mapped to the db:
-  for (var i in data) {
+  for (var i in hash) {
     if (this.tableProperties.hasOwnProperty(i)) {
-      _propertyNames.push(i);
-      _ppo.push('$' + _cnt);
-      _cnt++;
-      _propertyValues.push(data[i]);
+      propertyNames.push(i);
+      ppo.push('$' + cnt);
+      cnt++;
+      propertyValues.push(hash[i]);
     }
   }
 
-  var stmnt = 'INSERT INTO ' + _this.tableName + ' ( ' + _propertyNames.join() + ' ) VALUES (' + _ppo.join() + ') RETURNING ID';
+  var stmnt = 'INSERT INTO ' + _this.tableName + ' ( ' + propertyNames.join() + ' ) VALUES (' + ppo.join() + ') RETURNING ID';
 
   var defer = Q.defer();
-  dbCall(stmnt, _propertyValues).then(function(data) {
+  dbCall(stmnt, propertyValues).then(function(data) {
     var newObject = new Base();
     newObject.tableProperties = _this.tableProperties;
     newObject.tableName = _this.tableName;
 
     newObject.id = data.rows[0].id;
 
-    for(var j in _propertyNames) {
-      var k = _propertyNames[j];
-      newObject[k] = _propertyValues[j];
+    for(var j in propertyNames) {
+      var k = propertyNames[j];
+      newObject[k] = propertyValues[j];
     }
     defer.resolve(newObject);
   });
@@ -82,40 +80,51 @@ Base.prototype.create = function(data) {
   return defer.promise;
 }; // end create
 
+Base.prototype.createMany = function(arrayOfHashes) {
+  var _this = this;
+  var promiseArray = _.map(arrayOfHashes, function(objectDefinition) {
+    console.log(objectDefinition);
+    return _this.create(objectDefinition);
+  });
+
+  return Q.all(promiseArray);
+};
+
 Base.prototype.update = function(hash) {
   var _this = this;
 
-  var _propertyValues = [], 
-      _cnt = 1,
-      _stmntChunks = [],
-      _sourceValues, 
-      _sourceKeys;
+  var propertyValues = [], 
+      cnt = 1,
+      stmntChunks = [],
+      sourceValues, 
+      sourceKeys;
 
+  // use our own properties or use a passed-in hash?
   if (hash) {
-    _sourceValues = _sourceKeys = hash;
+    sourceValues = sourceKeys = hash;
   } else {
-    _sourceKeys = _this.tableProperties;
-    _sourceValues = _this;
+    sourceKeys = _this.tableProperties;
+    sourceValues = _this;
   } 
 
-  if (_sourceKeys.hasOwnProperty('id') == false || _sourceKeys.id == null) {
+  if (sourceKeys.hasOwnProperty('id') == false || sourceKeys.id == null) {
     throw new Error('Update call with hash requires \'id\' to update');
   }
 
   // statement building:
-  for (var i in _sourceKeys) {
+  for (var i in sourceKeys) {
     if (i != 'id') {
-      _stmntChunks.push(i + ' = $' + _cnt);
-      _cnt++;
-      _propertyValues.push(_sourceValues[i]);
+      stmntChunks.push(i + ' = $' + cnt);
+      cnt++;
+      propertyValues.push(sourceValues[i]);
     }
   }
-  _propertyValues.push(_sourceValues.id);
+  propertyValues.push(sourceValues.id);
 
-  var stmnt = 'UPDATE ' + _this.tableName + ' SET ' + _stmntChunks.join() + ' WHERE id=$' + _cnt;
+  var stmnt = 'UPDATE ' + _this.tableName + ' SET ' + stmntChunks.join() + ' WHERE id=$' + cnt;
 
   var defer = Q.defer();
-  dbCall(stmnt, _propertyValues).then(function(data) {
+  dbCall(stmnt, propertyValues).then(function(data) {
     defer.resolve(data);
   });
 

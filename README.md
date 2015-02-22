@@ -43,6 +43,11 @@ var person = {
     'email': { 
       'type': 'string',
       'required': true
+    },
+    'relations': {
+      'belongsTo': [ 'account' ],
+      'hasMany': [ 'phone' ],
+      'hasOne': [ 'address' ]
     }
   }
 };
@@ -69,8 +74,11 @@ I like [db-migrate](https://www.npmjs.com/package/db-migrate) to manage the data
 
 ### Available methods
 
-##### create({ hash })
+##### create(hash)
 Create an object with the properties in the hash. This will return a new pg-orm object.
+
+##### createMany([hash])
+Create multiple objects, one for each entry in the array. Only properties that match inside the hash will be used to create the database records. This will return an array of new pg-orm objects.
 
 ##### update()
 Update the database with the properties of the object that matches tableProperties. This will return the raw pg result.
@@ -87,6 +95,15 @@ Delete the object by ID. This will return the raw pg result.
 ##### delete()
 Euphamisn for deleteById with the current ID.
 
+### Caveats
+
+`pg-orm` expects objects to have a primary key named `id`. 
+
+### Todos
+
+* Add in simple relationships (has / belongs to)
+* Add in quick and dirty validation
+* Add in event bindings
 
 ### Quick start for developing pg-orm
 Clone the project locally then install node modules:

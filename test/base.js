@@ -6,19 +6,19 @@ var orm = require('../libs/orm.js');
 
 // tie the base tests to the test table:
 var testBase = orm.build({ 
-  'tableName': 'test', 
-  'tableProperties': { 
-    'id': {
-      'type': 'key'
+  tableName: 'test', 
+  tableProperties: { 
+    id: {
+      type: 'key'
     },
-    'name': { 
-      'type': 'string' 
+    name: { 
+      type: 'string' 
     }
   }
 });
 
 describe('crud operators', function () {
-  it('should should build an object', function () {
+  it('should build an object', function () {
     assert(testBase.tableName == 'test', 'named object should be named');
   });
 
@@ -27,6 +27,13 @@ describe('crud operators', function () {
       assert(testObject.name == 'Create', 'Name should be Create');
       assert(typeof testObject.id != 'undefined', 'ID should not be undefined after insert');
       assert(testObject.prototype == testBase.prototype, 'Protos don\'t match');
+      done();
+    });
+  });
+
+  it('should be able to create an array of objects', function(done) {
+    testBase.createMany([{ 'name': 'Create1' }, { 'name': 'Create2' }]).then(function(testObjectArray) {
+      assert(testObjectArray.length == 2, 'Return array should have 2 items');
       done();
     });
   });

@@ -81,6 +81,7 @@ describe('crud operators', function () {
   it('should be able to delete an existing object', function(done) {
     testBase.create({ 'name': 'Delete' }).then(function(testObject) {
       testObject.delete().then(function(data) {
+        // TODO: reload the object, make sure its gone
         done();
       })
     });

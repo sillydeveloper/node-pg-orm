@@ -13,6 +13,7 @@ module.exports.build = function(obj) {
   var newObjectBase = new baseOrm.Base();
   newObjectBase.tableName = obj.tableName;
   newObjectBase.tableProperties = obj.tableProperties;
+  newObjectBase.tableRelations = obj.tableRelations;
 
   /* if (obj.relations) {
     if (obj.relations.belongsTo) {

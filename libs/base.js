@@ -4,6 +4,7 @@ var pg = require('pg');
 var fs = require('fs');
 var Q = require('q');
 var _ = require('lodash');
+var humps = require('humps');
 
 // read in the database.json file:
 var dbFile = './database.json';
@@ -16,6 +17,7 @@ var connectionString = 'postgres://' + db.dev.user + ':' + db.dev.password + '@'
 
 // convenience method:
 function dbCall(stmnt, values) {
+  console.log(stmnt, values);
   // return a promise encased db call
   var defer = Q.defer();
   pg.connect(connectionString, function(err, client, done) {
@@ -52,12 +54,28 @@ Base.prototype.create = function(hash) {
 
   // check the incoming data to ensure that it's legit mapped to the db:
   for (var i in hash) {
-    if (this.tableProperties.hasOwnProperty(i)) {
+    if (_this.tableProperties.hasOwnProperty(i)) {
       propertyNames.push(i);
       ppo.push('$' + cnt);
       cnt++;
       propertyValues.push(hash[i]);
     }
+  }
+
+  // check relations:
+  if (_this.tableRelations) {
+    _.each(_this.tableRelations, function(item, key) {
+      if (key == 'belongsTo') {
+        _.each(item, function(bt) {
+          if (hash.hasOwnProperty(bt) && hash[bt]) {
+            propertyNames.push(humps.decamelize(bt) + '_id');
+            ppo.push('$' + cnt);
+            cnt++;
+            propertyValues.push(hash[bt].id);
+          }
+        });
+      }
+    });
   }
 
   var stmnt = 'INSERT INTO ' + _this.tableName + ' ( ' + propertyNames.join() + ' ) VALUES (' + ppo.join() + ') RETURNING ID';
@@ -83,7 +101,6 @@ Base.prototype.create = function(hash) {
 Base.prototype.createMany = function(arrayOfHashes) {
   var _this = this;
   var promiseArray = _.map(arrayOfHashes, function(objectDefinition) {
-    console.log(objectDefinition);
     return _this.create(objectDefinition);
   });
 

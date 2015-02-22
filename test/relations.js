@@ -3,6 +3,7 @@
 
 var assert = require('assert');
 var orm = require('../libs/orm.js');
+var _ = require('lodash');
 
 // tie the base tests to the test table:
 var testBase = orm.build({ 
@@ -15,7 +16,7 @@ var testBase = orm.build({
       type: 'string' 
     }
   },
-  relations: {
+  tableRelations: {
     hasMany: [ 'testMany' ]
   }
 });
@@ -30,14 +31,22 @@ var testMany = orm.build({
       type: 'string' 
     }
   },
-  relations: {
+  tableRelations: {
     belongsTo: [ 'test' ]
   }
 });
 
-describe('crud operators', function () {
-  it('should be able to load', function () {
-    assert(testBase.tableName == 'test', 'named object should be named');
+describe('relationships matter', function () {
+  it('should be able to assign a parent to a hasMany', function (done) {
+    testBase.create({ name: 'HasMany' }).then(function(hasManyObject) {
+      testMany.createMany([{ name: 'belongs1', test: hasManyObject }, { name: 'belongs2', test: hasManyObject }]).then(function(belongsToArray) {
+        assert(belongsToArray.length == 2, 'Should have 2 objects');
+        _.each(belongsToArray, function(obj) {
+          assert(obj['test_id'] == hasManyObject.id, 'Relationships should map back');
+        });
+        done();
+      });
+    })
   });
 
 });
